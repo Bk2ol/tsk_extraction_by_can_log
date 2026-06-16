@@ -2,7 +2,7 @@
 Step 2: Fingerprint Patch — Ensure openpilot recognizes the car.
 
 Vehicle requirement: Any (can be off)
-Action: Patches missing TSS3 firmware markers into TOYOTA_SIENNA_4TH_GEN.
+Action: Patches missing Sienna firmware markers into TOYOTA_SIENNA_4TH_GEN.
 """
 
 from __future__ import annotations
@@ -64,7 +64,7 @@ def check_fingerprint_status() -> dict:
 
 def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
     """Check and patch fingerprint. Returns True if complete."""
-    from tss3_setup import mark_step, confirm
+    from toyota_dataflash_secoc_setup import mark_step, confirm
 
     print("[fingerprint] Checking openpilot fingerprint...")
     print(f"[fingerprint] Target: {TARGET_CAR}")
@@ -130,7 +130,7 @@ def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
         print("  ⚠️  ACTION REQUIRED: Please reboot the comma device:")
         print("     sudo reboot")
         print()
-        print("  After reboot, re-run: python3 tss3_setup.py")
+        print("  After reboot, re-run: python3 toyota_dataflash_secoc_setup.py")
         mark_step(state, "fingerprint_patch", "complete", patched=True, needs_reboot=True)
         return False  # Return False to pause — user needs to reboot
     else:

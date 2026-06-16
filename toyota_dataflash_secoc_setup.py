@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-TSS3 SecOC Key Setup Wizard — Single controller script.
+Toyota Dataflash SecOC Setup — Single controller script.
 
 Usage on comma device:
-    python3 tss3_setup.py          # Interactive wizard, resumes from last state
-    python3 tss3_setup.py --status # Show current progress
-    python3 tss3_setup.py --step collect_can   # Jump to specific step
-    python3 tss3_setup.py --redo collect_can   # Force re-run a step
-    python3 tss3_setup.py --yes    # Auto-confirm all prompts
+    python3 toyota_dataflash_secoc_setup.py          # Interactive wizard, resumes from last state
+    python3 toyota_dataflash_secoc_setup.py --status # Show current progress
+    python3 toyota_dataflash_secoc_setup.py --step collect_can   # Jump to specific step
+    python3 toyota_dataflash_secoc_setup.py --redo collect_can   # Force re-run a step
+    python3 toyota_dataflash_secoc_setup.py --yes    # Auto-confirm all prompts
 
 Workflow:
     1. collect_can        — Collect CAN frames (READY mode, ~60s)
@@ -33,7 +33,7 @@ from typing import Optional
 # Constants
 # ---------------------------------------------------------------------------
 
-SETUP_DIR = Path("/data/tss3_setup")
+SETUP_DIR = Path("/data/toyota_dataflash_secoc_setup")
 STATE_FILE = SETUP_DIR / "state.json"
 VERSION = "20260611"
 
@@ -116,7 +116,7 @@ def mark_step(state: dict, step: str, status: str, **extra):
 def print_banner(state: dict):
     print()
     print("╔══════════════════════════════════════════════════════════╗")
-    print("║  TSS3 SecOC Key Setup Wizard                            ║")
+    print("║  Toyota Dataflash SecOC Setup                           ║")
     print("╠══════════════════════════════════════════════════════════╣")
     for i, step in enumerate(STEPS, 1):
         s = step_status(state, step)
@@ -255,10 +255,10 @@ def check_dependencies():
         venv_py = find_venv_python()
         if venv_py:
             print(f"  Recommended run command:")
-            print(f"    PYTHONPATH=/data/openpilot {venv_py} tss3_setup.py")
+            print(f"    PYTHONPATH=/data/openpilot {venv_py} toyota_dataflash_secoc_setup.py")
         else:
             print("  Recommended run command:")
-            print("    PYTHONPATH=/data/openpilot python3 tss3_setup.py")
+            print("    PYTHONPATH=/data/openpilot python3 toyota_dataflash_secoc_setup.py")
             print("  (You may also need: pip install pycryptodome)")
         print()
         return False
@@ -266,24 +266,30 @@ def check_dependencies():
 
 
 def main():
-    ap = argparse.ArgumentParser(description="TSS3 SecOC Key Setup Wizard")
+    ap = argparse.ArgumentParser(description="Toyota Dataflash SecOC Setup")
     ap.add_argument("--status", action="store_true", help="Show current progress and exit")
     ap.add_argument("--step", choices=STEPS, help="Jump to a specific step")
     ap.add_argument("--redo", choices=STEPS, help="Force re-run a completed step")
     ap.add_argument("--yes", action="store_true", help="Auto-confirm all prompts")
-    ap.add_argument("--setup-dir", default="/data/tss3_setup", help="Override setup directory")
+    ap.add_argument(
+        "--setup-dir",
+        default="/data/toyota_dataflash_secoc_setup",
+        help="Override setup directory",
+    )
     args = ap.parse_args()
 
     global SETUP_DIR, STATE_FILE
     SETUP_DIR = Path(args.setup_dir)
     STATE_FILE = SETUP_DIR / "state.json"
+
+    if args.status:
+        state = load_state()
+        print_banner(state)
+        return 0
+
     SETUP_DIR.mkdir(parents=True, exist_ok=True)
 
     state = load_state()
-
-    if args.status:
-        print_banner(state)
-        return 0
 
     if args.redo:
         mark_step(state, args.redo, "pending")

@@ -31,7 +31,7 @@ CAN_SECONDS = 60.0
 
 def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
     """Collect CAN frames. Returns True if complete."""
-    from tss3_setup import mark_step, confirm
+    from toyota_dataflash_secoc_setup import mark_step, confirm
 
     can_log = setup_dir / "can_oracle.ndjson"
     fp_log = setup_dir / "can_fingerprint.ndjson"
@@ -56,7 +56,7 @@ def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
         from panda import Panda
     except ImportError:
         print("[ERROR] Cannot import panda. Make sure you're on the comma device.")
-        print("        Try: PYTHONPATH=/data/openpilot python3 tss3_setup.py")
+        print("        Try: PYTHONPATH=/data/openpilot python3 toyota_dataflash_secoc_setup.py")
         mark_step(state, "collect_can", "failed", error="panda import failed")
         return False
 

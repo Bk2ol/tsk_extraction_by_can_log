@@ -192,7 +192,7 @@ def verify_protected(candidate, samples):
 
 def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
     """Extract and verify SecOC key. Returns True if key found."""
-    from tss3_setup import mark_step, confirm
+    from toyota_dataflash_secoc_setup import mark_step, confirm
 
     # Check dependencies
     try:

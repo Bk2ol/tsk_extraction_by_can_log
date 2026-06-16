@@ -23,7 +23,7 @@ BUS = 0
 
 def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
     """Run EPS probe. Returns True if complete."""
-    from tss3_setup import mark_step, confirm
+    from toyota_dataflash_secoc_setup import mark_step, confirm
 
     print("[eps_probe] Read-only EPS UDS probe")
     print(f"[eps_probe] TX: 0x{TX_ADDR:x}, RX: 0x{RX_ADDR:x}, Bus: {BUS}")

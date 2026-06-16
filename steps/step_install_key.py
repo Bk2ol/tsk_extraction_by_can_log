@@ -23,7 +23,7 @@ INSTALL_TARGETS = [
 
 def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
     """Install SecOC key. Returns True if complete."""
-    from tss3_setup import mark_step, confirm
+    from toyota_dataflash_secoc_setup import mark_step, confirm
 
     key_file = setup_dir / "SecOCKey.hex"
     if not key_file.exists():
