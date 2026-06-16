@@ -1,6 +1,10 @@
-# TSS3 SecOC Key Setup Wizard
+# Toyota Dataflash SecOC Setup
 
-Automated tool for Toyota TSS3 (Sienna 4TH_GEN) SecOC key extraction and installation on comma/openpilot devices.
+Automated tool for Toyota TSK / ECU Security Key / SecOC key extraction and installation on comma/openpilot devices using an EPS dataflash workflow.
+
+This repository is intentionally named around the method, not a specific model or Toyota Safety Sense generation. Toyota's official 2024 Sienna materials list the vehicle with Toyota Safety Sense 2.0, not TSS3, and TSS versioning is not a reliable proxy for TSK / ECU Security Key behavior.
+
+The currently validated target for this workflow is a 4th-gen Toyota Sienna with EPS part `8965B4514000`.
 
 ## Step-by-Step Instructions
 
@@ -8,7 +12,7 @@ Automated tool for Toyota TSS3 (Sienna 4TH_GEN) SecOC key extraction and install
 
 - A comma device (comma 3/3X) with openpilot/sunnypilot installed
 - SSH access to the comma device
-- Toyota Sienna 4TH_GEN / TSS3 vehicle with EPS part `8965B4514000`
+- Currently validated target: 4th-gen Toyota Sienna with EPS part `8965B4514000`
 - The `tss3_remote_dump_research_kit/payload_dataflash_ff200000_ff208000.bin` payload file (included in this repo)
 
 ### 1. Copy Files to Comma Device
@@ -16,14 +20,14 @@ Automated tool for Toyota TSS3 (Sienna 4TH_GEN) SecOC key extraction and install
 From your computer:
 
 ```bash
-scp -r tss3_setup/ comma@<COMMA_IP>:/data/tss3_setup/
+scp -r . comma@<COMMA_IP>:/data/toyota_dataflash_secoc_setup/
 ```
 
 Also copy the payload (needed for Step 4):
 
 ```bash
 scp tss3_remote_dump_research_kit/payload_dataflash_ff200000_ff208000.bin \
-    comma@<COMMA_IP>:/data/tss3_setup/
+    comma@<COMMA_IP>:/data/toyota_dataflash_secoc_setup/
 ```
 
 ### 2. SSH Into Comma
@@ -35,8 +39,8 @@ ssh comma@<COMMA_IP>
 ### 3. Run the Wizard
 
 ```bash
-cd /data/tss3_setup
-PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 tss3_setup.py
+cd /data/toyota_dataflash_secoc_setup
+PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 toyota_dataflash_secoc_setup.py
 ```
 
 > **Note:** If you get dependency errors, the script will tell you the correct Python path. Common alternatives:
@@ -49,7 +53,7 @@ The wizard guides you through 6 steps. Each step tells you what vehicle state is
 
 ```
 ╔══════════════════════════════════════════════════════════╗
-║  TSS3 SecOC Key Setup Wizard                            ║
+║  Toyota Dataflash SecOC Setup                           ║
 ╠══════════════════════════════════════════════════════════╣
 ║  [ ] Step 1: Collect CAN Log (READY mode)               ║
 ║  [ ] Step 2: Fingerprint Patch                          ║
@@ -74,8 +78,8 @@ The wizard guides you through 6 steps. Each step tells you what vehicle state is
 **Vehicle state:** READY (hybrid system on, dashboard shows READY)
 
 ```bash
-cd /data/tss3_setup
-PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 tss3_setup.py --yes
+cd /data/toyota_dataflash_secoc_setup
+PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 toyota_dataflash_secoc_setup.py --yes
 ```
 
 If fingerprint was patched, reboot and re-run:
@@ -83,8 +87,8 @@ If fingerprint was patched, reboot and re-run:
 sudo reboot
 # ... wait for reboot ...
 ssh comma@<COMMA_IP>
-cd /data/tss3_setup
-PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 tss3_setup.py --yes
+cd /data/toyota_dataflash_secoc_setup
+PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 toyota_dataflash_secoc_setup.py --yes
 ```
 
 ### Session 2: EPS Dump (car in IG-ON)
@@ -97,8 +101,8 @@ PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 tss3_setup.py --yes
 **Vehicle state:** IG-ON only (electronics on, hybrid NOT started)
 
 ```bash
-cd /data/tss3_setup
-PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 tss3_setup.py --yes
+cd /data/toyota_dataflash_secoc_setup
+PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 toyota_dataflash_secoc_setup.py --yes
 ```
 
 Steps 3-5 will run:
@@ -127,19 +131,19 @@ After reboot, test:
 
 ```bash
 # Check current progress without running anything
-python3 tss3_setup.py --status
+python3 toyota_dataflash_secoc_setup.py --status
 
 # Skip to a specific step
-python3 tss3_setup.py --step dump_dataflash
+python3 toyota_dataflash_secoc_setup.py --step dump_dataflash
 
 # Re-run a completed step
-python3 tss3_setup.py --redo collect_can
+python3 toyota_dataflash_secoc_setup.py --redo collect_can
 
 # Auto-confirm all prompts (no Y/n questions)
-python3 tss3_setup.py --yes
+python3 toyota_dataflash_secoc_setup.py --yes
 
 # Use a custom directory
-python3 tss3_setup.py --setup-dir /data/my_setup
+python3 toyota_dataflash_secoc_setup.py --setup-dir /data/my_setup
 ```
 
 ---
@@ -151,12 +155,12 @@ python3 tss3_setup.py --setup-dir /data/my_setup
 The script auto-detects missing packages and suggests the fix. Usually:
 
 ```bash
-PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 tss3_setup.py
+PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 toyota_dataflash_secoc_setup.py
 ```
 
 If `/usr/local/venv/bin/python3` doesn't exist, try:
 ```bash
-PYTHONPATH=/data/openpilot /data/openpilot/.venv/bin/python3 tss3_setup.py
+PYTHONPATH=/data/openpilot /data/openpilot/.venv/bin/python3 toyota_dataflash_secoc_setup.py
 ```
 
 ### "DIAGNOSTIC_SESSION_CONTROL - conditions not correct"
@@ -195,7 +199,7 @@ This is the "prime + power cycle" pattern:
 ## What Gets Generated
 
 ```
-/data/tss3_setup/
+/data/toyota_dataflash_secoc_setup/
 ├── state.json              # Wizard progress (resumable)
 ├── can_oracle.ndjson       # CAN sync/protected frames (Step 1)
 ├── can_fingerprint.ndjson  # All CAN frames (Step 1)

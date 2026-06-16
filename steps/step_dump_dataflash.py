@@ -49,7 +49,7 @@ def derive_security_key(seed: bytes) -> bytes:
 
 def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
     """Run DataFlash dump. Returns True if complete."""
-    from tss3_setup import mark_step, confirm
+    from toyota_dataflash_secoc_setup import mark_step, confirm
 
     dump_file = setup_dir / f"dump_{DUMP_START:08x}_{DUMP_END:08x}.bin"
     prev_status = state.get("steps", {}).get("dump_dataflash", {}).get("status")
@@ -268,7 +268,7 @@ def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
         print("     1. Turn car completely OFF")
         print("     2. Wait 30 seconds")
         print("     3. Turn to IG-ON (press start WITHOUT brake)")
-        print("     4. Re-run: python3 tss3_setup.py")
+        print("     4. Re-run: python3 toyota_dataflash_secoc_setup.py")
         print()
         mark_step(state, "dump_dataflash", "primed", attempts=attempts + 1, bytes=bytes_received)
         return False

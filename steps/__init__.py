@@ -1,1 +1,1 @@
-# Steps package for TSS3 Setup Wizard
+# Steps package for the Toyota Dataflash SecOC setup flow
