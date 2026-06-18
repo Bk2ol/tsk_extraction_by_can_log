@@ -15,7 +15,7 @@ The currently validated target for this workflow is a 4th-gen Toyota Sienna with
 - Currently validated target: 4th-gen Toyota Sienna with EPS part `8965B4514000`
 - The `payload_dataflash_ff200000_ff208000.bin` payload file (**included in this branch** — ready to use)
 
-> **This is the `prebuilt-8965B4514000` branch** — pre-built payload included, no compilation needed.
+> **This is the `prebuilt-sienna-eps-8965B4514000` branch** — pre-built payload included, no compilation needed.
 > For building payloads for other EPS models, see the `main` branch.
 
 ### 1. Get the Code on Comma Device
@@ -25,7 +25,7 @@ SSH into your comma device and clone this branch:
 ```bash
 ssh comma@<COMMA_IP>
 cd /data
-git clone -b prebuilt-8965B4514000 https://github.com/Bk2ol/tsk_extraction_by_can_log.git toyota_dataflash_secoc_setup
+git clone -b prebuilt-sienna-eps-8965B4514000 https://github.com/Bk2ol/tsk_extraction_by_can_log.git toyota_dataflash_secoc_setup
 ```
 
 ### 2. Run the Wizard
