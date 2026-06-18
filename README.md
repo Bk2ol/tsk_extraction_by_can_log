@@ -13,21 +13,14 @@ The currently validated target for this workflow is a 4th-gen Toyota Sienna with
 - A comma device (comma 3/3X) with openpilot/sunnypilot installed
 - SSH access to the comma device
 - Currently validated target: 4th-gen Toyota Sienna with EPS part `8965B4514000`
-- The `tss3_remote_dump_research_kit/payload_dataflash_ff200000_ff208000.bin` payload file (included in this repo)
+- The `payload_dataflash_ff200000_ff208000.bin` payload file (included in this repo at the root)
 
 ### 1. Copy Files to Comma Device
 
-From your computer:
+From your computer (this copies everything including the payload):
 
 ```bash
 scp -r . comma@<COMMA_IP>:/data/toyota_dataflash_secoc_setup/
-```
-
-Also copy the payload (needed for Step 4):
-
-```bash
-scp tss3_remote_dump_research_kit/payload_dataflash_ff200000_ff208000.bin \
-    comma@<COMMA_IP>:/data/toyota_dataflash_secoc_setup/
 ```
 
 ### 2. SSH Into Comma
