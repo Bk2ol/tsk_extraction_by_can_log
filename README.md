@@ -15,21 +15,17 @@ The currently validated target for this workflow is a 4th-gen Toyota Sienna with
 - Currently validated target: 4th-gen Toyota Sienna with EPS part `8965B4514000`
 - The `payload_dataflash_ff200000_ff208000.bin` payload file (included in this repo at the root)
 
-### 1. Copy Files to Comma Device
+### 1. Get the Code on Comma Device
 
-From your computer (this copies everything including the payload):
-
-```bash
-scp -r . comma@<COMMA_IP>:/data/toyota_dataflash_secoc_setup/
-```
-
-### 2. SSH Into Comma
+SSH into your comma device and clone the repo:
 
 ```bash
 ssh comma@<COMMA_IP>
+cd /data
+git clone https://github.com/Bk2ol/tsk_extraction_by_can_log.git toyota_dataflash_secoc_setup
 ```
 
-### 3. Run the Wizard
+### 2. Run the Wizard
 
 ```bash
 cd /data/toyota_dataflash_secoc_setup
@@ -40,7 +36,7 @@ PYTHONPATH=/data/openpilot /usr/local/venv/bin/python3 toyota_dataflash_secoc_se
 > - `/data/openpilot/.venv/bin/python3`
 > - `/usr/local/bin/python3` (may need `pip install pycryptodome`)
 
-### 4. Follow the Prompts
+### 3. Follow the Prompts
 
 The wizard guides you through 6 steps. Each step tells you what vehicle state is needed:
 
