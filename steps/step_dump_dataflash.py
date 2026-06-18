@@ -60,18 +60,28 @@ def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
         print("[dump] Make sure you power-cycled: OFF → 30s wait → IG-ON")
         print()
 
-    # Find payload
+    # Find payload — check multiple locations
     payload_path = setup_dir / "payload_dataflash_ff200000_ff208000.bin"
     if not payload_path.exists():
-        # Try to find it in the research kit
-        kit_payload = Path(__file__).resolve().parent.parent.parent / "tss3_remote_dump_research_kit" / "payload_dataflash_ff200000_ff208000.bin"
-        if kit_payload.exists():
+        search_paths = [
+            # Next to the script (bundled in repo)
+            Path(__file__).resolve().parent.parent / "payload_dataflash_ff200000_ff208000.bin",
+            # In tss3_remote_dump_research_kit sibling directory
+            Path(__file__).resolve().parent.parent.parent / "tss3_remote_dump_research_kit" / "payload_dataflash_ff200000_ff208000.bin",
+        ]
+        found = None
+        for p in search_paths:
+            if p.exists():
+                found = p
+                break
+        if found:
             import shutil
-            shutil.copy2(kit_payload, payload_path)
-            print(f"[dump] Copied payload from research kit")
+            shutil.copy2(found, payload_path)
+            print(f"[dump] Copied payload from {found}")
         else:
             print(f"[ERROR] Payload not found: {payload_path}")
             print(f"        Place payload_dataflash_ff200000_ff208000.bin in {setup_dir}")
+            print(f"        or alongside the script directory")
             mark_step(state, "dump_dataflash", "failed", error="payload not found")
             return False
 
