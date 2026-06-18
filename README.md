@@ -201,6 +201,50 @@ This is the "prime + power cycle" pattern:
 
 ---
 
+## Building Payload From Source (Advanced)
+
+The pre-built `payload_dataflash_ff200000_ff208000.bin` works for EPS part `8965B4514000`. To support a different EPS model or dump range, you can build a new payload from source:
+
+### Requirements
+- Docker (for V850 cross-compiler)
+- Python 3 with pycryptodome
+- The payload build secret for the target EPS bootloader
+
+### Steps
+
+```bash
+# 1. Edit the shellcode for your target range/CAN ID
+#    (modify start/end addresses and CAN TX ID in the C source)
+cd payload_source/shellcode
+vi main_ff1ff000_ff209000.c
+
+# 2. Compile with Docker (builds V850 toolchain + compiles)
+./build_docker.sh
+
+# 3. Encrypt and sign the payload
+cd ..
+python3 build_payload.py \
+  -s <PAYLOAD_BUILD_SECRET_16_BYTES_HEX> \
+  shellcode/main.bin \
+  -o ../payload_dataflash_ff200000_ff208000.bin
+```
+
+### Shellcode Parameters (in the C source)
+
+| Parameter | Current Value | Description |
+|-----------|---------------|-------------|
+| Dump start | `0xff200000` | EPS memory start address |
+| Dump end | `0xff208000` | EPS memory end address |
+| CAN TX ID | `0x7a9` | EPS response CAN address |
+| Reset vector | `0x0000157e` | Bootloader reset address |
+
+### Notes
+- The payload build secret is **not** the same as `SEED_KEY_SECRET` (UDS access)
+- Wrong secret = payload verification failure on the EPS
+- Each EPS model/bootloader may need a different secret
+
+---
+
 ## Security Notes
 
 - The **SecOCKey** is vehicle-specific — do not share `SecOCKey.hex` or the dump `.bin` publicly
