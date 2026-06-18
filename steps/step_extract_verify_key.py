@@ -98,14 +98,32 @@ def freshness(trip: int, reset: int, msg_cnt: int) -> bytes:
 
 
 def load_oracle_samples(oracle_path: Path):
-    """Load sync and protected samples from CAN oracle file."""
-    buses = {0, 2}
+    """Load sync and protected samples from CAN oracle file.
+    
+    Auto-detects which buses have 0x0F frames instead of hardcoding.
+    """
     protected_addrs = {0x131, 0x2E4, 0x344}
     sync_samples = []
     protected_samples = []
     sync_by_bus = {}
     sync_seen = set()
     prot_counts = {}
+
+    # First pass: detect which buses have sync frames
+    available_buses = set()
+    with oracle_path.open("r", encoding="utf-8") as f:
+        for line in f:
+            if not line.strip():
+                continue
+            r = json.loads(line)
+            if int(r["addr"]) == 0x0F:
+                available_buses.add(int(r["bus"]))
+    
+    if not available_buses:
+        print("[WARNING] No 0x0F sync frames found in oracle!")
+        return [], []
+    
+    print(f"    Detected buses with sync frames: {sorted(available_buses)}")
 
     with oracle_path.open("r", encoding="utf-8") as f:
         for line in f:
@@ -114,7 +132,7 @@ def load_oracle_samples(oracle_path: Path):
             r = json.loads(line)
             addr = int(r["addr"])
             bus = int(r["bus"])
-            if bus not in buses:
+            if bus not in available_buses:
                 continue
             data = bytes.fromhex(r["data"][:16])
 
@@ -310,13 +328,44 @@ def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
         print(f"    Best sync: {best_sync_m}/{best_sync_c} ({sync_rate*100:.1f}%)")
         print(f"    Best prot: {pm}/{pc} ({prot_rate*100:.1f}%)")
         print()
+
+        # Debug: show sample oracle data for troubleshooting
+        if sync_samples:
+            s = sync_samples[0]
+            print(f"    Debug - first sync sample: trip={s['trip']}, reset={s['reset']}, auth=0x{s['auth']:07x}, bus={s['bus']}")
+        if protected_samples:
+            p = protected_samples[0]
+            print(f"    Debug - first prot sample: addr=0x{p['addr']:x}, flag={p['flag']}, auth=0x{p['auth']:07x}")
+
+        # Show top 5 candidates by entropy
+        print()
+        print("    Top 5 candidates by entropy (unverified):")
+        for i, (sm, sc, c) in enumerate(ranked[:5]):
+            print(f"      #{i+1}: hash={c['hash']} addr=0x{c['addr']:08x} entropy={c['entropy']:.3f} sync={sm}/{sc}")
+
+        print()
         print("    Possible causes:")
         print("    - Not enough CAN oracle frames (re-run Step 1 in READY mode)")
         print("    - Dump incomplete or corrupted")
         print("    - Key not in expected memory range")
+        print("    - Different SecOC MAC format on this vehicle variant")
+        print()
+        print("    To export the best candidate anyway (UNVERIFIED):")
+        print("    Run with: --step extract_verify_key")
+        print("    Then manually test with openpilot to see if LKAS works.")
+
+        # Export best candidate as unverified for manual testing
+        key_file = setup_dir / "SecOCKey_UNVERIFIED.hex"
+        key_hex = best["key"].hex()
+        key_file.write_text(key_hex + "\n", encoding="utf-8")
+        import os
+        os.chmod(key_file, 0o600)
+        print(f"\n    Unverified best candidate saved: {key_file}")
+        print(f"    Key: {key_hex}")
 
         mark_step(state, "extract_verify_key", "failed",
                   best_hash=best["hash"],
                   sync_rate=f"{best_sync_m}/{best_sync_c}",
-                  protected_rate=f"{pm}/{pc}")
+                  protected_rate=f"{pm}/{pc}",
+                  unverified_key_file=str(key_file))
         return False

@@ -13,7 +13,7 @@ The currently validated target for this workflow is a 4th-gen Toyota Sienna with
 - A comma device (comma 3/3X) with openpilot/sunnypilot installed
 - SSH access to the comma device
 - Currently validated target: 4th-gen Toyota Sienna with EPS part `8965B4514000`
-- The `payload_dataflash_ff200000_ff208000.bin` payload file (included in this repo at the root)
+- A payload `.bin` file for your EPS model (build from source — see below, or use the `prebuilt-sienna-eps-8965B4514000` branch for a ready-to-use version)
 
 ### 1. Get the Code on Comma Device
 
@@ -45,8 +45,8 @@ The wizard guides you through 6 steps. Each step tells you what vehicle state is
 ║  Toyota Dataflash SecOC Setup                           ║
 ╠══════════════════════════════════════════════════════════╣
 ║  [ ] Step 1: Collect CAN Log (READY mode)               ║
-║  [ ] Step 2: Fingerprint Patch                          ║
-║  [ ] Step 3: EPS Probe (IG-ON)                          ║
+║  [ ] Step 2: EPS Probe (IG-ON)                          ║
+║  [ ] Step 3: Fingerprint Patch                          ║
 ║  [ ] Step 4: DataFlash Dump (IG-ON)                     ║
 ║  [ ] Step 5: SecOC Key Extraction & Verification        ║
 ║  [ ] Step 6: Install SecOC Key                          ║
@@ -198,6 +198,50 @@ This is the "prime + power cycle" pattern:
 ├── SecOCKey.hex            # The verified key (Step 5)
 └── key_backups/            # Previous key backups (Step 6)
 ```
+
+---
+
+## Building Payload From Source (Advanced)
+
+The pre-built `payload_dataflash_ff200000_ff208000.bin` works for EPS part `8965B4514000`. To support a different EPS model or dump range, you can build a new payload from source:
+
+### Requirements
+- Docker (for V850 cross-compiler)
+- Python 3 with pycryptodome
+- The payload build secret for the target EPS bootloader
+
+### Steps
+
+```bash
+# 1. Edit the shellcode for your target range/CAN ID
+#    (modify start/end addresses and CAN TX ID in the C source)
+cd payload_source/shellcode
+vi main_ff1ff000_ff209000.c
+
+# 2. Compile with Docker (builds V850 toolchain + compiles)
+./build_docker.sh
+
+# 3. Encrypt and sign the payload
+cd ..
+python3 build_payload.py \
+  -s <PAYLOAD_BUILD_SECRET_16_BYTES_HEX> \
+  shellcode/main.bin \
+  -o ../payload_dataflash_ff200000_ff208000.bin
+```
+
+### Shellcode Parameters (in the C source)
+
+| Parameter | Current Value | Description |
+|-----------|---------------|-------------|
+| Dump start | `0xff200000` | EPS memory start address |
+| Dump end | `0xff208000` | EPS memory end address |
+| CAN TX ID | `0x7a9` | EPS response CAN address |
+| Reset vector | `0x0000157e` | Bootloader reset address |
+
+### Notes
+- The payload build secret is **not** the same as `SEED_KEY_SECRET` (UDS access)
+- Wrong secret = payload verification failure on the EPS
+- Each EPS model/bootloader may need a different secret
 
 ---
 

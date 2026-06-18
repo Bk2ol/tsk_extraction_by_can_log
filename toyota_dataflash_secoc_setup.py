@@ -39,8 +39,8 @@ VERSION = "20260611"
 
 STEPS = [
     "collect_can",
-    "fingerprint_patch",
     "eps_probe",
+    "fingerprint_patch",
     "dump_dataflash",
     "extract_verify_key",
     "install_key",
