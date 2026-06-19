@@ -18,7 +18,8 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-DUMP_START = 0xFF200000
+DUMP_START = 0xFF1FF000
+DUMP_END = 0xFF209000
 MIN_ENTROPY = 3.5
 MAX_CANDIDATES = 2000
 MAX_SYNC_SAMPLES = 1024
@@ -221,7 +222,7 @@ def run(state: dict, setup_dir: Path, auto_yes: bool) -> bool:
         return False
 
     # Find dump
-    dump_file = setup_dir / f"dump_{DUMP_START:08x}_{DUMP_START + 0x8000:08x}.bin"
+    dump_file = setup_dir / f"dump_{DUMP_START:08x}_{DUMP_END:08x}.bin"
     if not dump_file.exists():
         print(f"[ERROR] Dump file not found: {dump_file}")
         print("        Complete Step 4 (dump_dataflash) first.")

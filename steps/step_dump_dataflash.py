@@ -4,7 +4,7 @@ Step 4: DataFlash Dump — Upload payload and dump EPS memory.
 Vehicle requirement: IG-ON only (not READY)
 May need 2 runs with power cycle between them (prime + dump pattern).
 
-Dumps range: 0xFF200000 - 0xFF208000 (32KB)
+Dumps range: 0xFF1FF000 - 0xFF209000 (40KB)
 """
 
 from __future__ import annotations
@@ -24,8 +24,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 TX_ADDR = 0x7A1
 RX_ADDR = 0x7A9
 BUS = 0
-DUMP_START = 0xFF200000
-DUMP_END = 0xFF208000
+DUMP_START = 0xFF1FF000
+DUMP_END = 0xFF209000
 
 # Payload parameters
 PAYLOAD_LOAD_ADDR = 0xFEBF0000
