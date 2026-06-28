@@ -1,10 +1,22 @@
-# Toyota Dataflash SecOC Setup
+# Toyota Dataflash SecOC Setup — Research Branch
 
-Automated tool for Toyota TSK / ECU Security Key / SecOC key extraction and installation on comma/openpilot devices using an EPS dataflash workflow.
+> **📦 Looking for the ready-to-use tool?** Switch to the [`main` branch](https://github.com/Bk2ol/tsk_extraction_by_can_log/tree/main).
+> The `main` branch has the pre-built payload and works out of the box for EPS `8965B4514000`.
+
+---
+
+This is the **research branch** — payload source code, wider dump range experiments, and work toward supporting additional EPS models.
 
 This repository is intentionally named around the method, not a specific model or Toyota Safety Sense generation. Toyota's official 2024 Sienna materials list the vehicle with Toyota Safety Sense 2.0, not TSS3, and TSS versioning is not a reliable proxy for TSK / ECU Security Key behavior.
 
-The currently validated target for this workflow is a 4th-gen Toyota Sienna with EPS part `8965B4514000`.
+## What's Here (vs. `main`)
+
+| This branch (`research`) | `main` branch |
+|---------------------------|---------------|
+| Payload source code (C + build scripts) | Pre-built `.bin` payload |
+| Wider dump range experiments (40KB) | Working 32KB dump |
+| Multi-EPS-model research | EPS `8965B4514000` only |
+| May require PAYLOAD_BUILD_SECRET | Ready to use, no secrets needed |
 
 ## Step-by-Step Instructions
 
@@ -13,16 +25,16 @@ The currently validated target for this workflow is a 4th-gen Toyota Sienna with
 - A comma device (comma 3/3X) with openpilot/sunnypilot installed
 - SSH access to the comma device
 - Currently validated target: 4th-gen Toyota Sienna with EPS part `8965B4514000`
-- A payload `.bin` file for your EPS model (build from source — see below, or use the `prebuilt-sienna-eps-8965B4514000` branch for a ready-to-use version)
+- A payload `.bin` file for your EPS model (build from source — see below)
 
 ### 1. Get the Code on Comma Device
 
-SSH into your comma device and clone the repo:
+SSH into your comma device and clone the research branch:
 
 ```bash
 ssh comma@<COMMA_IP>
 cd /data
-git clone https://github.com/Bk2ol/tsk_extraction_by_can_log.git toyota_dataflash_secoc_setup
+git clone -b research https://github.com/Bk2ol/tsk_extraction_by_can_log.git toyota_dataflash_secoc_setup
 ```
 
 ### 2. Run the Wizard
