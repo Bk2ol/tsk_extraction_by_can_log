@@ -2,9 +2,19 @@
 
 Automated tool for Toyota TSK / ECU Security Key / SecOC key extraction and installation on comma/openpilot devices using an EPS dataflash workflow.
 
-This repository is intentionally named around the method, not a specific model or Toyota Safety Sense generation. Toyota's official 2024 Sienna materials list the vehicle with Toyota Safety Sense 2.0, not TSS3, and TSS versioning is not a reliable proxy for TSK / ECU Security Key behavior.
+---
 
-The currently validated target for this workflow is a 4th-gen Toyota Sienna with EPS part `8965B4514000`.
+## ⚠️ IMPORTANT: Supported Hardware
+
+# 🚗 This tool ONLY works with EPS part number `8965B4514000`
+
+### Currently validated: **4th-gen Toyota Sienna (2021–2025) with EPS `8965B4514000`**
+
+> **If your EPS part number is different** (e.g. `8965B4512000`), this tool will NOT work for you.
+> Check `eps_probe.json` after Step 3 to confirm your EPS part number.
+> For research on other EPS models, see the [`research` branch](https://github.com/Bk2ol/tsk_extraction_by_can_log/tree/research).
+
+---
 
 ## Step-by-Step Instructions
 
@@ -12,21 +22,23 @@ The currently validated target for this workflow is a 4th-gen Toyota Sienna with
 
 - A comma device (comma 3/3X) with openpilot/sunnypilot installed
 - SSH access to the comma device
-- Currently validated target: 4th-gen Toyota Sienna with EPS part `8965B4514000`
-- The `payload_dataflash_ff200000_ff208000.bin` payload file (**included in this branch** — ready to use)
-
-> **This is the `prebuilt-sienna-eps-8965B4514000` branch** — pre-built payload included, no compilation needed.
-> For building payloads for other EPS models, see the `main` branch.
+- **4th-gen Toyota Sienna with EPS part `8965B4514000`**
+- Pre-built payload is included — no compilation needed
 
 ### 1. Get the Code on Comma Device
 
-SSH into your comma device and clone this branch:
+SSH into your comma device and clone the repo:
 
 ```bash
 ssh comma@<COMMA_IP>
 cd /data
-git clone -b prebuilt-sienna-eps-8965B4514000 https://github.com/Bk2ol/tsk_extraction_by_can_log.git toyota_dataflash_secoc_setup
+git clone https://github.com/Bk2ol/tsk_extraction_by_can_log.git toyota_dataflash_secoc_setup
 ```
+
+> ⚠️ **Note:** The clone command renames the folder to `toyota_dataflash_secoc_setup`. All subsequent commands assume this folder name. If you cloned without the rename, run:
+> ```bash
+> mv /data/tsk_extraction_by_can_log /data/toyota_dataflash_secoc_setup
+> ```
 
 ### 2. Run the Wizard
 
@@ -204,53 +216,20 @@ This is the "prime + power cycle" pattern:
 
 ---
 
-## Building Payload From Source (Advanced)
-
-The pre-built `payload_dataflash_ff200000_ff208000.bin` works for EPS part `8965B4514000`. To support a different EPS model or dump range, you can build a new payload from source:
-
-### Requirements
-- Docker (for V850 cross-compiler)
-- Python 3 with pycryptodome
-- The payload build secret for the target EPS bootloader
-
-### Steps
-
-```bash
-# 1. Edit the shellcode for your target range/CAN ID
-#    (modify start/end addresses and CAN TX ID in the C source)
-cd payload_source/shellcode
-vi main_ff1ff000_ff209000.c
-
-# 2. Compile with Docker (builds V850 toolchain + compiles)
-./build_docker.sh
-
-# 3. Encrypt and sign the payload
-cd ..
-python3 build_payload.py \
-  -s <PAYLOAD_BUILD_SECRET_16_BYTES_HEX> \
-  shellcode/main.bin \
-  -o ../payload_dataflash_ff200000_ff208000.bin
-```
-
-### Shellcode Parameters (in the C source)
-
-| Parameter | Current Value | Description |
-|-----------|---------------|-------------|
-| Dump start | `0xff200000` | EPS memory start address |
-| Dump end | `0xff208000` | EPS memory end address |
-| CAN TX ID | `0x7a9` | EPS response CAN address |
-| Reset vector | `0x0000157e` | Bootloader reset address |
-
-### Notes
-- The payload build secret is **not** the same as `SEED_KEY_SECRET` (UDS access)
-- Wrong secret = payload verification failure on the EPS
-- Each EPS model/bootloader may need a different secret
-
----
-
 ## Security Notes
 
 - The **SecOCKey** is vehicle-specific — do not share `SecOCKey.hex` or the dump `.bin` publicly
 - The source code does NOT contain any vehicle-specific keys
 - `SEED_KEY_SECRET` in the code is EPS-model-specific (same for all `8965B4514000` units), not vehicle-specific
 - `state.json` only stores key hash (SHA256 prefix), never the raw key
+
+---
+
+## Other Branches
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | **Ready-to-use** — pre-built payload for EPS `8965B4514000` |
+| `research` | Payload source code, wider dump experiments, support for other EPS models |
+
+For building payloads for other EPS models or contributing to research, see the [`research` branch](https://github.com/Bk2ol/tsk_extraction_by_can_log/tree/research).
